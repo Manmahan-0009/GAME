@@ -454,6 +454,22 @@ function restartLevel() {
 }
 
 // ─────────────────────────────────────────
+// SCREEN FLOW MAP — global NEXT button
+// ─────────────────────────────────────────
+var SCREEN_FLOW = {
+  "login_page": "welcome", "welcome": "story_intro", "story_intro": "level1_intro",
+  "level1_intro": "level1_game", "level1_game": "ransomware_clock",
+  "ransomware_clock": "level1_complete", "level1_timeout": "level1_complete",
+  "level1_complete": "level2_entry", "level2_entry": "level2_intro",
+  "level2_intro": "level2_game", "level2_game": "rogue_device_hunt",
+  "rogue_device_hunt": "level2_complete", "level2_timeout": "level2_complete",
+  "level2_complete": "level3_entry", "level3_entry": "level3_intro",
+  "level3_intro": "level3_game", "level3_game": "synthetic_media_trial",
+  "synthetic_media_trial": "level3_restoration", "level3_timeout": "level3_restoration",
+  "level3_restoration": "master_entry", "master_entry": "victory", "victory": "login_page"
+};
+
+// ─────────────────────────────────────────
 // MINI-GAME TIMERS
 // ─────────────────────────────────────────
 var _riv = null, _rdiv = null, _smtiv = null;
@@ -891,50 +907,33 @@ SCREENS.login_page = function () {
   return w;
 };
 SCREENS.welcome = function () {
+  var w = mk("div", { cls: "welcome-bg", sty: "font-family:var(--font-mono);color:var(--text-primary);height:100%;" });
 
-  var w = mk("div", { cls: "welcome-bg", sty: "padding-top:20px;text-align:center;font-family:var(--font-mono);color:var(--text-primary);height:100%;" });
-
-  var iotBar = mk("div", { sty: "width:100%;border-bottom:1px solid var(--border-color);box-shadow:var(--border-glow);margin-bottom:30px;padding-bottom:10px;display:flex;justify-content:center;gap:15px;font-size:14px;" });
-  const symbols = [
-    { sym: "[~]", lbl: "SENSOR GRID", col: "var(--text-primary)" },
-    { sym: "[#]", lbl: "CAM", col: "var(--accent-iot)" },
-    { sym: "[>]", lbl: "ACT", col: "var(--text-primary)" },
-    { sym: "[@]", lbl: "RELAY", col: "var(--accent-iot)" },
-    { sym: "[*]", lbl: "NEURAL", col: "var(--accent-warn)" },
-    { sym: "[=]", lbl: "", col: "var(--text-primary)" },
-    { sym: "[AI]", lbl: "", col: "var(--accent-warn)" }
-  ];
-  symbols.forEach(function (s, i) {
-    var n = mk("span", { cls: "iot-node", sty: "color:" + s.col + ";animation: stripBlink " + (1.5 + i * 0.3) + "s infinite;" });
-    n.innerHTML = s.sym + (s.lbl ? "<br><span style='font-size:10px;'>" + s.lbl + "</span>" : "");
-    iotBar.appendChild(n);
-  });
-  w.appendChild(iotBar);
-
-  var sysBox = mk("div", { sty: "border:1px solid var(--border-color);background:rgba(0,0,0,0.7);padding:20px;display:inline-block;margin-bottom:30px;text-align:left;" });
-  sysBox.appendChild(mk("div", { cls: "glitch", "data-text": "SYSTEM ZERO", txt: "SYSTEM ZERO", sty: "font-size:24px;color:var(--text-primary);margin-bottom:10px;" }));
-  sysBox.appendChild(mk("div", { txt: "NexaCorp Security Operations", sty: "color:var(--text-secondary);" }));
-  sysBox.appendChild(mk("div", { cls: "glitch", "data-text": "> NexaCorp Security Breach — Active", txt: "> NexaCorp Security Breach — Active", sty: "color:var(--accent-danger);margin-top:10px;" }));
+  // ── SYSTEM ZERO title box (centered, animated) ──
+  var sysBox = mk("div", { cls: "welcome-sys-box" });
+  sysBox.appendChild(mk("div", { cls: "glitch", "data-text": "SYSTEM ZERO", txt: "SYSTEM ZERO", sty: "font-size:clamp(22px,4vw,32px);color:var(--text-primary);margin-bottom:10px;letter-spacing:4px;" }));
+  sysBox.appendChild(mk("div", { txt: "NexaCorp Security Operations", sty: "color:var(--text-secondary);font-size:13px;letter-spacing:2px;margin-bottom:8px;" }));
+  sysBox.appendChild(mk("div", { cls: "glitch", "data-text": "\u2022 NexaCorp Security Breach — Active", txt: "\u2022 NexaCorp Security Breach — Active", sty: "color:var(--accent-danger);font-size:13px;animation:bl 1.1s infinite;" }));
   w.appendChild(sysBox);
 
-  var bootDiv = mk("div", { sty: "text-align:left;background:rgba(0,0,0,0.7);padding:10px;max-width:400px;margin:0 auto 30px auto;min-height:120px;" });
+  // ── Boot sequence text ──
+  var bootDiv = mk("div", { cls: "welcome-boot-div" });
   w.appendChild(bootDiv);
 
-  var authArea = mk("div", { cls: "hidden", sty: "background:rgba(0,0,0,0.7);display:inline-block;padding:20px;" });
+  // ── Auth input area ──
+  var authArea = mk("div", { cls: "welcome-auth-area hidden" });
   var inpWrap = mk("div", { cls: "terminal-inp-wrap" });
   var inp = mk("input", { cls: "terminal-inp", type: "text" });
   var err = mk("div", { cls: "err-msg center", sty: "min-height:20px;margin-bottom:10px;" });
   var btn = mk("button", { cls: "terminal-auth-btn", txt: "AUTHENTICATE" });
-
   inpWrap.appendChild(inp);
-  authArea.appendChild(mk("div", { txt: "OPERATOR_ID:", sty: "display:inline-block;margin-right:10px;" }));
+  authArea.appendChild(mk("div", { txt: "OPERATOR_ID:", sty: "margin-bottom:8px;font-size:12px;letter-spacing:2px;color:var(--text-muted);" }));
   authArea.appendChild(inpWrap);
   authArea.appendChild(mk("div"));
   authArea.appendChild(err);
   authArea.appendChild(btn);
-
   if (localStorage.getItem("sz2")) {
-    var rb = mk("button", { cls: "terminal-auth-btn", sty: "position:absolute;bottom:20px;right:20px;font-size:12px;padding:6px 14px;", txt: "RESTORE LAST SESSION" });
+    var rb = mk("button", { cls: "terminal-auth-btn", sty: "font-size:12px;padding:6px 14px;margin-top:10px;", txt: "RESTORE LAST SESSION" });
     addTap(rb, function () {
       var pw = prompt("GM ACCESS CODE:");
       if (!pw || pw.toLowerCase() !== (CONFIG.GM_PASSWORD || "iloveu").toLowerCase()) return;
@@ -951,18 +950,13 @@ SCREENS.welcome = function () {
   function doCheck() {
     var v = inp.value.trim().toUpperCase();
     if (v === CONFIG.LEVEL1_PASSWORD.toUpperCase()) {
-      SFX.success();
-      goTo("story_intro");
+      SFX.success(); goTo("story_intro");
     } else {
-      SFX.glitch();
-      S.wrongAttempts++;
+      SFX.glitch(); S.wrongAttempts++;
       inpWrap.classList.add("shake-h");
       err.textContent = ">> ACCESS DENIED <<";
       err.style.color = "var(--accent-danger)";
-      setTimeout(function () {
-        inpWrap.classList.remove("shake-h");
-        err.textContent = "";
-      }, 1800);
+      setTimeout(function () { inpWrap.classList.remove("shake-h"); err.textContent = ""; }, 1800);
     }
   }
   inp.addEventListener("keydown", function (e) { if (e.key === "Enter") doCheck(); });
@@ -977,29 +971,20 @@ SCREENS.welcome = function () {
   ];
   var li = 0;
   function nextLine() {
-    if (li >= lines.length) {
-      authArea.classList.remove("hidden");
-      return;
-    }
+    if (li >= lines.length) { authArea.classList.remove("hidden"); return; }
     var lDiv = mk("div", { sty: "margin-bottom:5px;" });
     bootDiv.appendChild(lDiv);
     var text = lines[li];
     typeText(lDiv, text, 25, false, function () {
       if (li < lines.length - 1) {
         setTimeout(function () {
-          var ok = mk("span", { txt: " [OK]", sty: "color:var(--text-primary);font-weight:bold;" });
-          lDiv.appendChild(ok);
-          li++;
-          setTimeout(nextLine, 400);
-        }, 200);
-      } else {
-        li++;
-        setTimeout(nextLine, 400);
-      }
+          lDiv.appendChild(mk("span", { txt: " [OK]", sty: "color:var(--text-primary);font-weight:bold;" }));
+          li++; setTimeout(nextLine, 350);
+        }, 150);
+      } else { li++; setTimeout(nextLine, 350); }
     });
   }
   setTimeout(nextLine, 400);
-
   return w;
 };
 SCREENS.story_intro = function () {
@@ -2078,6 +2063,27 @@ document.addEventListener("DOMContentLoaded", function () {
     var pbLeft = document.createElement("span"); pbLeft.textContent = "NexaCorp Security Operations \u2014 CLEARANCE: SYSTEM ZERO";
     var pbRight = document.createElement("span"); pbRight.id = "pb-screen-id"; pbRight.textContent = S.screen;
     pbot.appendChild(pbLeft); pbot.appendChild(pbRight); document.body.appendChild(pbot);
+    // ── Persistent top-left control strip (RESET / SKIP TEXT / NEXT) ──
+    var ptl = document.createElement("div"); ptl.id = "persistent-tl";
+    var ptlReset = document.createElement("button"); ptlReset.className = "ptl-btn ptl-reset"; ptlReset.textContent = "RESET";
+    ptlReset.addEventListener("click", function () {
+      var pw = prompt("GM ACCESS CODE:");
+      if (!pw || pw.toLowerCase() !== (CONFIG.GM_PASSWORD || "iloveu").toLowerCase()) return;
+      if (confirm("RESET game for next team?")) resetGame();
+    });
+    var ptlSkip = document.createElement("button"); ptlSkip.className = "ptl-btn ptl-skip"; ptlSkip.textContent = "SKIP TEXT";
+    ptlSkip.addEventListener("click", function () {
+      clearTypeTimers();
+      document.querySelectorAll(".terminal-auth-btn.hidden, .btn.hidden").forEach(function (el) { el.classList.remove("hidden"); });
+      document.querySelectorAll("button.btn.ghost").forEach(function (b) { if (b.textContent.trim() === "SKIP TEXT") b.click(); });
+    });
+    var ptlNext = document.createElement("button"); ptlNext.className = "ptl-btn ptl-next"; ptlNext.textContent = "NEXT \u00bb";
+    ptlNext.addEventListener("click", function () {
+      var next = SCREEN_FLOW[S.screen];
+      if (next) { stopTimer(); stopL2(); stopRansomT(); stopRogueT(); clearTypeTimers(); goTo(next); }
+    });
+    ptl.appendChild(ptlReset); ptl.appendChild(ptlSkip); ptl.appendChild(ptlNext);
+    document.body.appendChild(ptl);
     var ainit = false;
     document.body.addEventListener("click", function () { if (!ainit) { ainit = true; getACtx(); } }, { once: true });
     var rz = document.getElementById("reset-zone"), rtimer = null;

@@ -2729,3 +2729,142 @@ body {
 .name-reveal-big{font-size:clamp(22px,4vw,36px) !important;}
 
 #bg-layer{filter:brightness(0.28) contrast(1.3) saturate(0.55) hue-rotate(100deg) !important;}
+
+/* ── PERSISTENT TOP-LEFT CONTROL STRIP ──────────────────── */
+#persistent-tl {
+  position: fixed;
+  top: 7px;
+  left: 7px;
+  z-index: 9995;
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+.ptl-btn {
+  background: rgba(0,0,0,0.88);
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 4px 9px;
+  cursor: pointer;
+  min-height: 24px;
+  text-transform: uppercase;
+  opacity: 0.55;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.ptl-btn:hover {
+  opacity: 1;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 8px rgba(0,255,65,0.5);
+  transform: translateY(-1px);
+}
+.ptl-btn:active { transform: scale(0.95); }
+.ptl-reset { border-color: rgba(255,0,51,0.5); color: #ff3355; }
+.ptl-reset:hover { border-color: var(--accent-danger) !important; color: var(--accent-danger) !important; box-shadow: 0 0 10px rgba(255,0,51,0.5) !important; }
+.ptl-skip { border-color: rgba(0,204,255,0.4); color: var(--accent-iot); }
+.ptl-skip:hover { border-color: var(--accent-iot) !important; color: var(--accent-iot) !important; box-shadow: 0 0 10px rgba(0,204,255,0.4) !important; }
+.ptl-next { border-color: rgba(255,204,0,0.45); color: var(--accent-warn); }
+.ptl-next:hover { border-color: var(--accent-warn) !important; color: var(--accent-warn) !important; box-shadow: 0 0 10px rgba(255,204,0,0.4) !important; }
+
+/* ── 3D CARD HOVER EFFECTS ──────────────────────────────── */
+.card, .osint-card, .exhibit-card, .terminal-card {
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1), box-shadow 0.35s ease;
+  will-change: transform;
+}
+.card:hover, .osint-card:hover, .exhibit-card:hover, .terminal-card:hover {
+  transform: perspective(900px) rotateY(2deg) rotateX(1deg) translateZ(6px);
+  box-shadow: 0 14px 36px rgba(0,255,65,0.12), 0 0 0 1px rgba(0,255,65,0.18);
+}
+.action-card {
+  transition: transform 0.3s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s ease, background 0.2s;
+}
+.action-card:hover:not(.sel) {
+  transform: perspective(800px) translateZ(8px) rotateX(0.8deg);
+  box-shadow: 0 8px 24px rgba(0,255,65,0.1);
+}
+.action-card.sel {
+  transform: perspective(800px) translateZ(4px);
+  box-shadow: 0 4px 16px rgba(0,255,65,0.2);
+}
+.btn {
+  transition: background 0.22s cubic-bezier(0.23,1,0.32,1), color 0.18s, box-shadow 0.25s, transform 0.18s !important;
+}
+.btn:hover, .btn:active { transform: perspective(600px) translateZ(4px) !important; }
+.btn:active { transform: perspective(600px) translateZ(-1px) scale(0.96) !important; }
+.terminal-auth-btn {
+  transition: all 0.3s cubic-bezier(0.23,1,0.32,1) !important;
+}
+.terminal-auth-btn:hover {
+  transform: perspective(600px) translateZ(5px) !important;
+  box-shadow: 0 0 20px rgba(0,255,65,0.25) !important;
+}
+
+/* ── FLOAT / GLOW ANIMATIONS ────────────────────────────── */
+@keyframes floatGlow {
+  0%,100% { transform: translateY(0px); filter: drop-shadow(0 0 10px rgba(0,255,65,0.5)); }
+  50%      { transform: translateY(-7px); filter: drop-shadow(0 0 22px rgba(0,255,65,0.85)); }
+}
+@keyframes floatSubtle {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-5px); }
+}
+@keyframes holoPulse {
+  0%,100% { box-shadow: 0 0 6px rgba(0,255,65,0.3), inset 0 0 6px rgba(0,255,65,0.03); }
+  50%      { box-shadow: 0 0 22px rgba(0,255,65,0.6), 0 0 44px rgba(0,255,65,0.1), inset 0 0 10px rgba(0,255,65,0.06); }
+}
+@keyframes borderPulse {
+  0%,100% { border-color: rgba(0,255,65,0.35); }
+  50%      { border-color: rgba(0,255,65,0.85); }
+}
+.login-sys-title {
+  animation: floatGlow 5s ease-in-out infinite, loginTitlePop 0.65s cubic-bezier(.15,.85,.35,1) forwards !important;
+}
+.kali-terminal {
+  animation: floatSubtle 7s ease-in-out infinite, holoPulse 4s ease-in-out infinite;
+}
+.osint-card { animation: holoPulse 5s ease-in-out infinite; }
+.terminal-tv-wrap { animation: floatSubtle 8s ease-in-out 1s infinite; }
+
+/* ── WELCOME SCREEN CENTERING ───────────────────────────── */
+.welcome-bg {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-top: 0 !important;
+  gap: 0;
+}
+.welcome-sys-box {
+  border: 1px solid var(--border-color);
+  background: rgba(0,0,0,0.82);
+  padding: 28px 36px;
+  text-align: center;
+  margin-bottom: 22px;
+  animation: holoPulse 4s ease-in-out infinite, borderPulse 3s ease-in-out infinite;
+  max-width: 480px;
+  width: 90%;
+}
+.welcome-boot-div {
+  text-align: left;
+  background: rgba(0,0,0,0.75);
+  padding: 14px 18px;
+  max-width: 480px;
+  width: 90%;
+  margin-bottom: 18px;
+  min-height: 100px;
+  border: 1px solid rgba(0,255,65,0.12);
+}
+.welcome-auth-area {
+  background: rgba(0,0,0,0.75);
+  padding: 20px 24px;
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  border: 1px solid rgba(0,255,65,0.12);
+}
+
