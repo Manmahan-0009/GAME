@@ -2156,7 +2156,8 @@ p {
   #persistent-top { font-size: 10px; padding: 0 4px; }
 }
 
-.welcome-bg { background: rgba(0, 0, 0, 0.7); width: 100%; height: 100%; padding: 20px; box-sizing: border-box; }
+/* welcome-bg — flex centered (overrides older rule) */
+.welcome-bg { background: rgba(0,0,0,0.7); width:100%; min-height:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
 /* ═══════════════════════════════════════════════════════════════
    BACKGROUND IMAGE SYSTEM
@@ -2534,6 +2535,57 @@ body {
 #game-container {
   background: transparent !important;
   min-height: calc(100vh - 56px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,255,65,0.25) transparent;
+}
+#game-container::-webkit-scrollbar { width: 3px; }
+#game-container::-webkit-scrollbar-thumb { background: rgba(0,255,65,0.3); }
+
+/* ── DROPDOWN POPUP ANIMATION ─────────────────────── */
+.term-select-menu {
+  transform-origin: top center;
+  transform: scaleY(0.85);
+  opacity: 0;
+  transition: max-height 0.3s cubic-bezier(0.23,1,0.32,1),
+              transform 0.25s cubic-bezier(0.23,1,0.32,1),
+              opacity 0.2s ease !important;
+}
+.term-select-wrap.open .term-select-menu {
+  transform: scaleY(1) !important;
+  opacity: 1 !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.95), 0 0 24px rgba(107,159,255,0.18) !important;
+  z-index: 300 !important;
+}
+/* Option rows — full width, no letter code column */
+.term-select-option {
+  grid-template-columns: 1fr auto !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+}
+.option-text { font-size: 13px !important; color: #c8ffd4 !important; }
+.option-tag { font-size: 10px !important; color: #a78bfa !important; white-space: nowrap; }
+/* Trigger 3D lift when open */
+.term-select-wrap.open .term-select-trigger {
+  transform: perspective(600px) translateZ(4px);
+  transition: transform 0.25s ease, border-color 0.2s, box-shadow 0.2s !important;
+}
+/* Select label — cleaner */
+.term-select-label { font-size: 10px; letter-spacing: 2px; color: #6b9fff; text-transform: uppercase; margin-bottom: 5px; }
+/* Placeholder text color */
+.term-select-trigger:not(.sel-active) .term-select-value { color: rgba(107,159,255,0.5) !important; font-style: italic; }
+
+/* ── DEV PANEL 3D POP-OUT ─────────────────────────── */
+#dev-panel {
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1),
+              box-shadow 0.35s ease !important;
+}
+#dev-panel.open {
+  transform: translateY(0) !important;
+  box-shadow: 0 -8px 48px rgba(255,0,51,0.3),
+              0 -2px 16px rgba(255,0,51,0.15),
+              inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
 /* 3. 3D ELEVATED TERMINAL PANEL */

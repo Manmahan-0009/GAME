@@ -541,13 +541,13 @@ function addTap(el, fn) {
   el.addEventListener("click", function (e) { try { fn(e); } catch (err) { console.error("tap handler:", err); } });
 }
 function typeText(el, text, speed, isAI, cb) {
-  el.textContent = ""; var i = 0;
+  el.textContent = ""; el._fullText = text; el._typeCb = cb; var i = 0;
   function tick() {
     if (i < text.length) {
       el.textContent += text[i];
       if (text[i] !== " " && text[i] !== "\n") SFX.type(isAI);
       i++; _tt.push(setTimeout(tick, speed || 35));
-    } else if (cb) cb();
+    } else { delete el._fullText; delete el._typeCb; if (cb) cb(); }
   } tick();
 }
 function glitch(cb) {
@@ -699,8 +699,8 @@ function gmResetBtn() {
 function storyScreen(title, col, body, nextId, nextLbl, spd) {
   var w = mk("div", { cls: "terminal-tv-wrap" });
   var hdr = mk("div", { cls: "terminal-tv-hdr" });
-  hdr.appendChild(mk("div", { txt: "■ NEXACORP // SECURE TERMINAL v2.1" }));
-  hdr.appendChild(mk("div", { html: "<span style='color:var(--text-primary);animation:stripBlink 1s infinite;'>●</span> LIVE" }));
+  hdr.appendChild(mk("div", { txt: "\u25a0 NEXACORP // SECURE TERMINAL v2.1" }));
+  hdr.appendChild(mk("div", { html: "<span style='color:var(--text-primary);animation:stripBlink 1s infinite;'>\u25cf</span> LIVE" }));
   w.appendChild(hdr);
 
   var main = mk("div", { cls: "terminal-tv-main" });
@@ -710,47 +710,52 @@ function storyScreen(title, col, body, nextId, nextLbl, spd) {
   var li = 0;
 
   var btnWrap = mk("div", { sty: "margin-top:20px;text-align:center;" });
-  var btn = mk("button", { cls: "terminal-auth-btn hidden", txt: nextLbl || "[ TAP TO CONTINUE ]" });
+  var btn = mk("button", { cls: "terminal-auth-btn hidden", txt: nextLbl || "TAP TO CONTINUE" });
   addTap(btn, function () { goTo(nextId); });
   btnWrap.appendChild(btn);
 
-  var cursor = mk("div", { cls: "term-cursor hidden", txt: "█" });
+  var cursor = mk("div", { cls: "term-cursor hidden", txt: "\u2588" });
+
+  function finishAll() {
+    clearTypeTimers();
+    main.innerHTML = "";
+    lines.forEach(function (lineText) {
+      if (lineText.trim() === "") { main.appendChild(mk("br", { sty: "display:block;height:4px;" })); return; }
+      var p = mk("p", { cls: "terminal-line", txt: lineText });
+      if (lineText.startsWith(">") || lineText.startsWith("\u25ba")) p.classList.add("t-line-prim");
+      else if (lineText.startsWith("[SYS]")) p.classList.add("t-line-sec");
+      else if (lineText.startsWith("[A.I]") || lineText.startsWith("N3XUS")) p.classList.add("t-line-ai");
+      else if (lineText.startsWith("[IOT]")) p.classList.add("t-line-iot");
+      else if (lineText.startsWith("[WRN]") || lineText.startsWith("WARNING")) p.classList.add("t-line-warn");
+      else if (lineText.startsWith("[ERR]") || lineText.startsWith("ACCESS DENIED")) p.classList.add("t-line-err");
+      else if (lineText.includes("\u2501\u2501\u2501")) p.classList.add("t-line-mut");
+      main.appendChild(p);
+    });
+    cursor.classList.remove("hidden"); main.appendChild(cursor); main.appendChild(btnWrap);
+    btn.classList.remove("hidden"); main.scrollTop = main.scrollHeight;
+  }
+  w._skipAll = finishAll;
 
   function typeNextLine() {
     if (li >= lines.length) {
-      main.appendChild(cursor);
-      cursor.classList.remove("hidden");
-      main.appendChild(btnWrap);
-      setTimeout(function () { btn.classList.remove("hidden"); main.scrollTop = main.scrollHeight; }, 600);
+      main.appendChild(cursor); cursor.classList.remove("hidden"); main.appendChild(btnWrap);
+      setTimeout(function () { btn.classList.remove("hidden"); main.scrollTop = main.scrollHeight; }, 400);
       return;
     }
-
     var lineText = lines[li];
-    if (lineText.trim() === "") {
-      main.appendChild(mk("br", { sty: "display:block;height:4px;" }));
-      li++;
-      typeNextLine();
-      return;
-    }
-
+    if (lineText.trim() === "") { main.appendChild(mk("br", { sty: "display:block;height:4px;" })); li++; typeNextLine(); return; }
     var p = mk("p", { cls: "terminal-line" });
-    if (lineText.startsWith(">") || lineText.startsWith("►")) p.classList.add("t-line-prim");
+    if (lineText.startsWith(">") || lineText.startsWith("\u25ba")) p.classList.add("t-line-prim");
     else if (lineText.startsWith("[SYS]")) p.classList.add("t-line-sec");
     else if (lineText.startsWith("[A.I]") || lineText.startsWith("N3XUS")) p.classList.add("t-line-ai");
     else if (lineText.startsWith("[IOT]")) p.classList.add("t-line-iot");
     else if (lineText.startsWith("[WRN]") || lineText.startsWith("WARNING")) p.classList.add("t-line-warn");
     else if (lineText.startsWith("[ERR]") || lineText.startsWith("ACCESS DENIED")) p.classList.add("t-line-err");
-    else if (lineText.includes("━━━")) p.classList.add("t-line-mut");
-
+    else if (lineText.includes("\u2501\u2501\u2501")) p.classList.add("t-line-mut");
     main.appendChild(p);
-    typeText(p, lineText, spd || 20, false, function () {
-      li++;
-      main.scrollTop = main.scrollHeight;
-      setTimeout(typeNextLine, 300);
-    });
+    typeText(p, lineText, spd || 20, false, function () { li++; main.scrollTop = main.scrollHeight; setTimeout(typeNextLine, 220); });
   }
   setTimeout(typeNextLine, 100);
-
   return w;
 }
 function pwScreen(title, col, pw, nextId) {
@@ -1097,13 +1102,12 @@ SCREENS.level1_game = function () {
     var curOpt = EMAIL_OPTIONS[cat].find(function (o) { return o.id === S.l1.sel[cat]; }) || null;
     var trig = mk("div", { cls: "term-select-trigger" + (curOpt ? " sel-active" : "") });
     if (curOpt) { trig.style.borderColor = "var(--text-primary)"; }
-    var valSpan = mk("span", { cls: "term-select-value", txt: curOpt ? curOpt.text : "[ SELECT OPTION ]" });
+    var valSpan = mk("span", { cls: "term-select-value", txt: curOpt ? curOpt.text : "\u2014 SELECT \u2014" });
     var arrSpan = mk("span", { cls: "term-select-arrow", txt: "\u25bc" });
     trig.appendChild(valSpan); trig.appendChild(arrSpan);
     var menu = mk("div", { cls: "term-select-menu" });
     EMAIL_OPTIONS[cat].forEach(function (opt) {
       var row = mk("div", { cls: "term-select-option" + (S.l1.sel[cat] === opt.id ? " selected" : "") });
-      row.appendChild(mk("span", { cls: "option-code", txt: opt.id + ":" }));
       row.appendChild(mk("span", { cls: "option-text", txt: opt.text }));
       if (opt.tag) row.appendChild(mk("span", { cls: "option-tag", txt: opt.tag }));
       row.addEventListener("click", function () {
@@ -2073,9 +2077,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     var ptlSkip = document.createElement("button"); ptlSkip.className = "ptl-btn ptl-skip"; ptlSkip.textContent = "SKIP TEXT";
     ptlSkip.addEventListener("click", function () {
-      clearTypeTimers();
-      document.querySelectorAll(".terminal-auth-btn.hidden, .btn.hidden").forEach(function (el) { el.classList.remove("hidden"); });
-      document.querySelectorAll("button.btn.ghost").forEach(function (b) { if (b.textContent.trim() === "SKIP TEXT") b.click(); });
+      var gc = document.getElementById("game-container");
+      var first = gc && gc.firstChild;
+      if (first && typeof first._skipAll === "function") {
+        first._skipAll();
+      } else {
+        clearTypeTimers();
+        document.querySelectorAll("[_fullText]").forEach(function (el) {
+          if (el._fullText) { el.textContent = el._fullText; var cb = el._typeCb; delete el._fullText; delete el._typeCb; if (cb) cb(); }
+        });
+        document.querySelectorAll(".terminal-auth-btn.hidden, .btn.hidden").forEach(function (el) { el.classList.remove("hidden"); });
+      }
     });
     var ptlNext = document.createElement("button"); ptlNext.className = "ptl-btn ptl-next"; ptlNext.textContent = "NEXT \u00bb";
     ptlNext.addEventListener("click", function () {
