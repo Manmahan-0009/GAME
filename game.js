@@ -687,6 +687,36 @@ function skipBtn(to) {
   var b = mk("button", { cls: "btn ghost", txt: ">>", sty: "margin-bottom:0" });
   addTap(b, function () { goTo(to); }); return b;
 }
+function retryState(level) {
+  if (level === 1) {
+    S.l1 = { targetIdx: 0, cleared: [], attempts: 0, sel: { sender: null, subject: null, tone: null, link: null, visual: null }, attackMethod: "PHISHING" };
+    S.ransomware = { sel: [], correct: false, started: false, expired: false };
+  } else if (level === 2) {
+    S.l2 = { devices: dc(DEVICES), secured: 0, spreadTick: 0 };
+    S.rogueHunt = { flagged: [], sortCol: null, sortAsc: true, filter: "all", macShown: {}, started: false };
+  } else if (level === 3) {
+    S.l3 = { exchIdx: 0, history: [], moles: [], aiFailure: "BLIND TRUST" };
+    S.mediaTrial = { verdicts: { A: null, B: null, C: null }, cluesA: [], cluesB: [], cluesC: [], started: false, playedA: false };
+    S.masterCode = { p1: "PHISHING", p2: "0", p3: "BLIND TRUST", derived: "" };
+  }
+}
+function retryCurrentFlow() {
+  stopTimer(); stopL2(); stopRansomT(); stopRogueT(); stopMediaT(); clearTypeTimers();
+  var s = S.screen;
+  if (s === "login_page" || s === "victory") { resetGame(); return; }
+  if (s === "welcome" || s === "story_intro") { goTo("story_intro"); return; }
+  if (["level1_intro", "level1_game", "ransomware_clock", "level1_timeout", "level1_complete"].includes(s)) {
+    retryState(1); S.level = 0; save(); goTo("level1_intro"); return;
+  }
+  if (["level2_entry", "level2_intro", "level2_game", "rogue_device_hunt", "level2_timeout", "level2_complete"].includes(s)) {
+    retryState(2); S.level = 0; save(); goTo("level2_intro"); return;
+  }
+  if (["level3_entry", "level3_intro", "level3_game", "synthetic_media_trial", "level3_timeout", "level3_restoration"].includes(s)) {
+    retryState(3); S.level = 0; save(); goTo("level3_intro"); return;
+  }
+  if (s === "master_entry") { deriveMaster(); save(); goTo("master_entry"); return; }
+  goTo(s);
+}
 function gmResetBtn() {
   var b = mk("button", { cls: "btn ghost", txt: "RESET", sty: "margin-bottom:0;border-color:var(--accent-danger);color:var(--accent-danger);" });
   addTap(b, function () {
@@ -2075,6 +2105,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!pw || pw.toLowerCase() !== (CONFIG.GM_PASSWORD || "iloveu").toLowerCase()) return;
       if (confirm("RESET game for next team?")) resetGame();
     });
+    var ptlRetry = document.createElement("button"); ptlRetry.className = "ptl-btn ptl-retry"; ptlRetry.textContent = "RETRY";
+    ptlRetry.addEventListener("click", function () { retryCurrentFlow(); });
     var ptlSkip = document.createElement("button"); ptlSkip.className = "ptl-btn ptl-skip"; ptlSkip.textContent = "SKIP TEXT";
     ptlSkip.addEventListener("click", function () {
       var gc = document.getElementById("game-container");
@@ -2094,7 +2126,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var next = SCREEN_FLOW[S.screen];
       if (next) { stopTimer(); stopL2(); stopRansomT(); stopRogueT(); clearTypeTimers(); goTo(next); }
     });
-    ptl.appendChild(ptlReset); ptl.appendChild(ptlSkip); ptl.appendChild(ptlNext);
+    ptl.appendChild(ptlReset); ptl.appendChild(ptlRetry); ptl.appendChild(ptlSkip); ptl.appendChild(ptlNext);
     document.body.appendChild(ptl);
     var ainit = false;
     document.body.addEventListener("click", function () { if (!ainit) { ainit = true; getACtx(); } }, { once: true });
