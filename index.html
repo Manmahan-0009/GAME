@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="SYSTEM ZERO — NexaCorp Security Escape Room Game">
+  <title>SYSTEM ZERO</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background image layer — swapped per screen -->
+  <div id="bg-layer"></div>
+  <!-- Main game container — all screens render here -->
+  <div id="game-container"></div>
+  <!-- Hidden reset zone — long press top-left corner for 3s to reset -->
+  <div id="reset-zone"></div>
+  <!-- Glitch transition overlay -->
+  <div id="glitch-overlay"></div>
+  <!-- Game Master navigation -->
+  <button id="gm-btn" title="Game Master Menu">&#9776;</button>
+  <div id="gm-overlay"></div>
+  <div id="gm-panel">
+    <div class="gm-hdr">
+      <span class="gm-title">GAME MASTER</span>
+      <button id="gm-close">&#x2715;</button>
+    </div>
+    <div id="gm-body"></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
